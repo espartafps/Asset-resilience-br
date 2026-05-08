@@ -232,36 +232,51 @@ def calculate_normalized_drawdown(
     vol_pre_evento: float,
 ) -> Optional[float]:
     """
-    Drawdown máximo normalizado pela volatilidade anualizada pré-evento.
+    Drawdown máximo expresso em número de desvios padrão diários pré-evento.
 
-    Interpreta a severidade da queda em relação ao regime de risco habitual
-    do ativo. Um valor de -2.0 indica que a queda máxima observada
-    equivale a 2 vezes a volatilidade anual estimada pré-evento.
+    Responde à pergunta: "quantas variações diárias típicas do ativo essa
+    queda máxima representou?" — a unidade natural de risco em mesas de
+    trading e modelos de VaR.
+
+    Cálculo:
+        vol_diaria  = vol_pre_evento (anualizada) / sqrt(252)
+        resultado   = drawdown_max / vol_diaria
+
+    Exemplos de interpretação:
+        -10σ → queda equivalente a 10 variações diárias típicas (stress moderado)
+        -25σ → queda extremamente severa; comum apenas em crises sistêmicas
 
     Args:
         serie: Série de preços/cotas.
         t_start: Início da janela de análise.
         t_end: Fim da janela de análise.
-        vol_pre_evento: Volatilidade anualizada pré-evento.
+        vol_pre_evento: Volatilidade ANUALIZADA pré-evento (saída de
+                        calculate_pre_event_volatility).
 
     Returns:
-        Razão drawdown_max / vol_pre_evento, ou None se indisponível.
+        float negativo (desvios padrão diários), ou None se indisponível.
 
     Limitações conhecidas:
-        - Divide drawdown cumulativo por vol anualizada — não é um z-score
-          estatístico estrito; é uma métrica de intensidade relativa.
-        - Para ativos com baixíssima vol (ex: CDI), o z-score pode ser
-          distorcido por pequenas variações numéricas.
+        - Retornos diários não são normalmente distribuídos; σ diário é
+          apenas uma escala de referência, não uma probabilidade precisa.
+        - Para ativos de baixíssima vol (ex: CDI), pequenas flutuações
+          numéricas produzem denominadores muito pequenos — use com cautela.
+        - Não é comparável com um z-score de distribuição normal; serve
+          apenas para comparar severidade relativa entre ativos e eventos.
     """
     dd_result = calculate_drawdown(serie, t_start, t_end)
     dd_max = dd_result.get("drawdown_max")
 
     if dd_max is None:
         return None
-    if vol_pre_evento == 0 or vol_pre_evento is None:
+    if not vol_pre_evento:
         return None
 
-    return float(dd_max / vol_pre_evento)
+    vol_diaria = vol_pre_evento / np.sqrt(BUSINESS_DAYS_PER_YEAR)
+    if vol_diaria == 0:
+        return None
+
+    return float(dd_max / vol_diaria)
 
 
 # ─────────────────────────────────────────────────────────────
