@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Dados brutos (não versionar — podem conter arquivos pesados)
+data/raw/*.xlsx
+data/raw/*.xls
+data/raw/*.csv
+
+# Figuras geradas (regeneráveis)
+figures/post1/*.png
+figures/post1/*.svg
+
+# IDE
+.vscode/
+.idea/
+*.DS_Store
+
+# Dados processados intermediários
+data/processed/*.pkl
+data/processed/*.parquet
