@@ -3,8 +3,6 @@
 Projeto público de análise quantitativa de como diferentes classes de ativos
 brasileiros se comportaram em três episódios de stress relevantes (2020–2023).
 
-Série de 6 posts no LinkedIn. Este repositório contém o código do **Post 1**.
-
 ---
 
 ## Estrutura do projeto
